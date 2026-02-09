@@ -54,17 +54,21 @@ sys_sleep(void)
   int n;
   uint ticks0;
 
-  argint(0, &n);
+  argint(0, &n); // acquire time to sleep
   if(n < 0)
     n = 0;
   acquire(&tickslock);
-  ticks0 = ticks;
+  ticks0 = ticks; // tick: global timer
   while(ticks - ticks0 < n){
     if(killed(myproc())){
       release(&tickslock);
       return -1;
     }
     sleep(&ticks, &tickslock);
+    // 1. Set proc to SLEEP state
+    // 2. Release tickslock
+    // 3. Yield CPU to other procs
+    // 4. After wake-up, re-aquire tickslock
   }
   release(&tickslock);
   return 0;
